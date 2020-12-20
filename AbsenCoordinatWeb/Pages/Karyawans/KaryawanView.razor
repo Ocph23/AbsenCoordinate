@@ -1,0 +1,57 @@
+﻿@page "/karyawan"
+
+@using AbsenCoordinatWeb.Models
+@using AbsenCoordinatWeb.Data
+
+
+@inject KaryawanService karyawanService
+@inject NavigationManager nav
+
+<h4>Karyawan</h4>
+<p>Daftar Karyawan </p>
+<a href="/karyawan/create"><span class="oi oi-plus" aria-hidden="true"></span></a>
+
+@if (karyawans == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nama</th>
+                <th>Jabatan</th>
+                <th>Alamat</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in karyawans)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.Jabatan</td>
+                    <td>@item.Alamat</td>
+                    <td>
+                        <button @onclick="()=>edit(item.Id)" class="btn btn-warning">Edit</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<Karyawan> karyawans;
+
+    protected override async Task OnInitializedAsync()
+    {
+        karyawans = await karyawanService.Get();
+    }
+
+    async Task edit(int id)
+    {
+        nav.NavigateTo($"karyawan/change/{id}");
+    }
+}

@@ -1,0 +1,57 @@
+﻿@using AbsenCoordinatWeb.Models
+@using AbsenCoordinatWeb.Data
+
+@inject TempatService tempatService 
+
+<div style="width:400px">
+    <EditForm Model="@Tempat" OnValidSubmit="@HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="mb-3">
+            <label for="nama" class="form-label">Nama Tempat</label>
+            <InputText class="form-control" id="name" @bind-Value="Tempat.Nama" />
+        </div>
+        <div class="mb-3">
+            <label for="jabatan" class="form-label">Alamat</label>
+            <InputTextArea class="form-control" id="alamat" @bind-Value="Tempat.Address" />
+        </div>
+        <div style="text-align:right">
+            <button type="button" @onclick="Cancel" class="btn btn-warning">Batal</button>
+            <button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+    </EditForm>
+</div>
+
+
+@code {
+    [Parameter] public TempatView Tempat{ get; set; }
+
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+
+        protected override Task OnInitializedAsync()
+        {
+        
+            return base.OnInitializedAsync();
+        }
+
+        async void HandleValidSubmit()
+    {
+
+        try
+        {
+            var result = await tempatService.Save(Tempat);
+            await BlazoredModal.Close();
+        }
+        catch (Exception ex)
+        {
+
+        }
+
+    }
+
+    async Task Cancel()
+    {
+        await BlazoredModal.Cancel();
+    }
+}

@@ -1,0 +1,209 @@
+﻿@page "/map"
+
+@using AbsenCoordinatWeb.Models
+@using GoogleMapsComponents
+@using GoogleMapsComponents.Maps
+@using AbsenCoordinatWeb.Data
+
+@inject TempatService tempatService
+@inject NavigationManager nav
+
+@inject IModalService Modal
+@inject IJSRuntime JS;
+
+<h3>TEMPAT ABSEN</h3>
+
+<button style="margin:5px" @onclick="ShowMap"><span style="margin-right:10px" class="oi oi-eye" ></span>Map</button>
+@if (IsEdit)
+{
+    <div style="height:@heightMap;">
+        <GoogleMap @ref="@map1" Id="map1" Options="@mapOptions"
+                   Height="100%" OnAfterInit="@(async () => await OnAfterInitAsync())"></GoogleMap>
+    </div>
+}
+
+@if (markers == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nama Tempat</th>
+                <th>Lokasi</th>
+                <th>Ala mat</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in markers)
+            {
+                <tr>
+                    <td>@item.Nama</td>
+                    <td>@item.Location</td>
+                    <td>@item.Address</td>
+                    <td>
+                        <button @onclick="()=>edit(item)" class="btn btn-warning">
+                            <span style="margin-right:10px" class="oi oi-pencil" ></span>
+                        </button>
+                        <button @onclick="()=>remove(item)" class="btn btn-danger">
+                            <span style="margin-right:10px" class="oi oi-delete" ></span>
+                        </button>
+                        <button @onclick="()=>detail(item)" class="btn btn-info">
+                            <span style="margin-right:10px" class="oi oi-menu" ></span>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    private GoogleMap map1;
+    private MapOptions mapOptions;
+    private DirectionsRenderer dirRend;
+    private string _durationTotalString;
+    private string _distanceTotalString;
+    private string latlong;
+    private string heightMap;
+    List<TempatView> markers { get; set; } = new List<TempatView>();
+    TempatView SelectedMarker;
+    bool IsEdit = false;
+    string ModalClass;
+
+
+    async void detail (TempatView item)
+    {
+        nav.NavigateTo($"map/detail/{item.Id}");
+    }
+
+    async void edit(TempatView item)
+    {
+        SelectedMarker = item;
+        var parameters = new ModalParameters();
+        parameters.Add("Tempat", item);
+        var modal=  Modal.Show<ModalEditTempat>("Edit Tempat", parameters);
+        var result = await modal.Result;
+        if (!result.Cancelled)
+        {
+            var newMarker = await CreateMarker(item.Nama, item.Latitude, item.Longitude);
+            await item.Marker.SetMap(null);
+            item.Marker = newMarker;
+            await newMarker.SetMap(map1.InteropObject);
+        }
+        else
+        {
+            if(item.Id<=0)
+            {
+                await item.Marker.SetMap(null);
+                markers.Remove(item);
+            }
+        }
+
+        StateHasChanged();
+
+    }
+
+    async void remove(TempatView item)
+    {
+        var deleted = await tempatService.Delete(item.Id);
+        if (deleted)
+        {
+            await  item.Marker.SetMap(null);
+            markers.Remove(item);
+        }
+
+        StateHasChanged();
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        mapOptions = new MapOptions()
+        {
+
+            Zoom = 18,
+            Center = new LatLngLiteral()
+            {
+                Lat = -2.537040886990973,
+                Lng = 140.7148611690794
+            },
+            MapTypeId = MapTypeId.Sattellite
+        };
+
+        heightMap = "80vh";
+        IEnumerable<Tempat> datas = await tempatService.Get();
+
+        markers.Clear();
+        foreach (var item in datas)
+        {
+            var tempat = new TempatView(item);
+
+            markers.Add(tempat);
+
+        }
+
+    }
+
+
+    async void onClickMap(MouseEvent data)
+    {
+        var tempat = new TempatView()
+        {
+            Latitude = data.LatLng.Lat,
+            Longitude = data.LatLng.Lng,
+            Nama = $"NewMarker{markers.Count + 1}"
+        };
+
+        var marker = await CreateMarker(tempat.Nama, data.LatLng.Lat, data.LatLng.Lng);
+        tempat.Marker = marker;
+        markers.Add(tempat);
+        await map1.InteropObject.PanTo(data.LatLng);
+        edit(tempat);
+        heightMap = "40vh";
+        StateHasChanged();
+    }
+
+    private async Task OnAfterInitAsync()
+    {
+        dirRend = await DirectionsRenderer.CreateAsync(map1.JsRuntime, new DirectionsRendererOptions()
+        {
+            Map = map1.InteropObject
+        });
+
+        await map1.InteropObject.AddListener<MouseEvent>("dblclick", onClickMap);
+
+        foreach (var tempat in markers)
+        {
+            tempat.Marker = await CreateMarker(tempat.Nama, tempat.Latitude, tempat.Longitude);
+        }
+
+        StateHasChanged();
+    }
+
+
+    void ShowMap()
+    {
+        IsEdit = !IsEdit;
+        StateHasChanged();
+    }
+
+
+    private async Task<Marker> CreateMarker(string name, double lat, double lng)
+    {
+        var marker = await Marker.CreateAsync(map1.JsRuntime, new MarkerOptions()
+        {
+            Position = new LatLngLiteral(lng, lat),
+            Map = map1.InteropObject,
+            Label = name
+        });
+
+        return marker;
+    }
+
+}

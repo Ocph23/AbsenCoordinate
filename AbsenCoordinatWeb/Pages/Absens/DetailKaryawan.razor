@@ -1,0 +1,142 @@
+﻿@page "/map/detail/{id}"
+
+
+
+@using AbsenCoordinatWeb.Data
+@using AbsenCoordinatWeb.Models
+@using GoogleMapsComponents
+@using GoogleMapsComponents.Maps
+
+@inject TempatService tempatService
+@inject KaryawanService karyawanService
+
+
+<h4>Tempat Absen dan Data Karyawan</h4>
+<h6>@tempat.Nama</h6>
+<div style="height:@heightMap;">
+    <GoogleMap @ref="@map1" Id="map1" Options="@mapOptions"
+               Height="100%" OnAfterInit="@(async () => await OnAfterInitAsync())"></GoogleMap>
+</div>
+
+
+
+@if (tempat == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+<div style="margin:20px; width:200px">
+    <div class="form-group">
+        <label>Pilih Karyawan</label>
+        <select class="form-control" @onchange="add">
+            <option value="">None</option>
+            @foreach (var item in karyawans.Where(x => !tempat.Karyawans.Any(z => z.KaryawanId.Equals(x.Id))))
+            {
+                <option value="@item.Id">@item.Name</option>
+            }
+        </select>
+    </div>
+</div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nama</th>
+                <th>Jabatan</th>
+                <th>Alamat</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in tempat.Karyawans)
+            {
+                <tr>
+                    <td>@item.Karyawan.Name</td>
+                    <td>@item.Karyawan.Email</td>
+                    <td>@item.Karyawan.Alamat</td>
+                    <td>
+                        <button @onclick="()=>remove(item)" class="btn btn-danger">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+
+@code {
+
+        [Parameter]
+        public string Id { get; set; }
+
+    private GoogleMap map1;
+    private MapOptions mapOptions;
+    string heightMap = "50vh";
+    Tempat tempat;
+    Karyawan Selected;
+
+    IEnumerable<Karyawan> karyawans;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var id = Convert.ToInt32(Id);
+
+        karyawans = await karyawanService.Get();
+
+        tempat = await tempatService.Get(id);
+
+        mapOptions = new MapOptions()
+        {
+
+            Zoom = 18,
+            Center = new LatLngLiteral()
+            {
+                Lat = tempat.Latitude,
+                Lng = tempat.Longitude
+            },
+            MapTypeId = MapTypeId.Sattellite
+        };
+    }
+
+    private async Task OnAfterInitAsync()
+    {
+
+        var latlong = mapOptions.Center;
+        var marker = await Marker.CreateAsync(map1.JsRuntime, new MarkerOptions()
+        {
+            Position = new LatLngLiteral(latlong.Lng, latlong.Lat),
+            Map = map1.InteropObject,
+            Label = tempat.Nama
+        });
+
+        await marker.SetMap(map1.InteropObject);
+
+        StateHasChanged();
+    }
+
+    async Task remove(TempatDetail karyawan)
+    {
+        bool result = await tempatService.DeleteKaryawan(tempat.Id, karyawan.KaryawanId);
+        if (result)
+        {
+            tempat.Karyawans.Remove(karyawan);
+        }
+    }
+
+    async void add(ChangeEventArgs obj)
+    {
+        var karyawanId =Convert.ToInt32(obj.Value) ;
+        var karyawan = karyawans.SingleOrDefault(x => x.Id == karyawanId);
+        if (karyawan != null)
+        {
+            bool result = await tempatService.AddKaryawan(tempat.Id, karyawan.Id);
+            if (result)
+            {
+            }
+        }
+    }
+
+
+}

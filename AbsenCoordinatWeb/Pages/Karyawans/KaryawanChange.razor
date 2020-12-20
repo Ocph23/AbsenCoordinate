@@ -1,0 +1,71 @@
+﻿@page "/Karyawan/create"
+@page "/Karyawan/change/{id}"
+
+@using AbsenCoordinatWeb.Models
+@using AbsenCoordinatWeb.Data
+
+@inject KaryawanService karyawanService
+@inject NavigationManager nav;
+
+<h3>@title</h3>
+
+
+<EditForm Model="@Model" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="mb-3">
+        <label for="nama" class="form-label">Nama Karyawan</label>
+        <InputText class="form-control" id="name" @bind-Value="Model.Name" />
+    </div>
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <InputText class="form-control" id="email" @bind-Value="Model.Email" />
+    </div>
+    <div class="mb-3">
+        <label for="jabatan" class="form-label">Jabatan</label>
+        <InputText class="form-control" id="jabatan" @bind-Value="Model.Jabatan" />
+    </div>
+    <div class="mb-3">
+        <label for="jabatan" class="form-label">Alamat</label>
+        <InputTextArea class="form-control" id="alamat" @bind-Value="Model.Alamat" />
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</EditForm>
+
+
+
+@code {
+
+    [Parameter]
+    public string Id { get; set; }
+
+    public Karyawan Model { get; set; }
+
+    string title;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrEmpty(Id))
+        {
+            title = "Buat Karyawan";
+            Model = new Karyawan();
+        }
+        else
+        {
+            Model = await karyawanService.Get(Convert.ToInt32(Id));
+            if(Model==null)
+            {
+                //throw
+            }
+        }
+    }
+
+
+    async Task HandleValidSubmit()
+    {
+        var result = await karyawanService.Save(Model);
+        if (result != null)
+            nav.NavigateTo("/Karyawan");
+    }
+
+}

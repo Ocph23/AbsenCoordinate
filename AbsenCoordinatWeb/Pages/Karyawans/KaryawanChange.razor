@@ -4,8 +4,12 @@
 @using AbsenCoordinatWeb.Models
 @using AbsenCoordinatWeb.Data
 
+
 @inject KaryawanService karyawanService
-@inject NavigationManager nav;
+@inject NavigationManager nav
+@inject SweetAlertService Swal
+
+@attribute [Authorize(Roles = "Hrd")]
 
 <h3>@title</h3>
 
@@ -13,23 +17,50 @@
 <EditForm Model="@Model" OnValidSubmit="@HandleValidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
-    <div class="mb-3">
-        <label for="nama" class="form-label">Nama Karyawan</label>
-        <InputText class="form-control" id="name" @bind-Value="Model.Name" />
+    <div class="col-md-12">
+        <div class="col-md-5">
+            <div class="mb-3">
+                <label for="nama" class="form-label">NIK</label>
+                <InputText class="form-control" id="name" @bind-Value="Model.NIK" />
+            </div>
+            <div class="mb-3">
+                <label for="nama" class="form-label">Nama Karyawan</label>
+                <InputText class="form-control" id="name" @bind-Value="Model.Name" />
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <InputText class="form-control" id="email" @bind-Value="Model.Email" />
+            </div>
+            <div class="mb-3">
+                <label for="jabatan" class="form-label">Jabatan</label>
+                <InputText class="form-control" id="jabatan" @bind-Value="Model.Jabatan" />
+            </div>
+
+        </div>
+        <div class="col-md-5">
+            <div class="mb-3">
+                <label for="email" class="form-label">Unit Kerja</label>
+                <InputText class="form-control" id="email" @bind-Value="Model.UnitKerja" />
+            </div>
+
+            <div class="mb-3">
+                <label for="jabatan" class="form-label">Lokasi Kerja</label>
+                <InputTextArea class="form-control" id="alamat" @bind-Value="Model.LokasiKerja" />
+            </div>
+            <div class="mb-3">
+                <label for="jabatan" class="form-label">Alamat</label>
+                <InputTextArea class="form-control" id="alamat" @bind-Value="Model.Alamat" />
+            </div>
+
+            @if (Model.Id <= 0)
+            {
+                <div class="mb-3">
+                    <label for="jabatan" class="form-label">Admin HRD : <InputCheckbox style="font-size:18px" id="alamat" @bind-Value="Model.IsHRD" /></label>
+                </div>
+            }
+        </div>
+        <button  style="text-align:right; margin-left:20px" type="submit" class="btn btn-success"><i class="oi oi-envelope-closed"></i> Simpan</button>
     </div>
-    <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <InputText class="form-control" id="email" @bind-Value="Model.Email" />
-    </div>
-    <div class="mb-3">
-        <label for="jabatan" class="form-label">Jabatan</label>
-        <InputText class="form-control" id="jabatan" @bind-Value="Model.Jabatan" />
-    </div>
-    <div class="mb-3">
-        <label for="jabatan" class="form-label">Alamat</label>
-        <InputTextArea class="form-control" id="alamat" @bind-Value="Model.Alamat" />
-    </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
 </EditForm>
 
 
@@ -53,19 +84,42 @@
         else
         {
             Model = await karyawanService.Get(Convert.ToInt32(Id));
-            if(Model==null)
-            {
-                //throw
-            }
         }
     }
 
 
     async Task HandleValidSubmit()
     {
-        var result = await karyawanService.Save(Model);
-        if (result != null)
-            nav.NavigateTo("/Karyawan");
+        try
+        {
+            var result = await karyawanService.Save(Model);
+            if (result != null)
+            {
+                await Swal.FireAsync(new SweetAlertOptions
+                {
+                    Position = SweetAlertPosition.TopEnd,
+                    Text = " Data Berhasil Disimpan !",
+                    Icon = SweetAlertIcon.Success,
+                    Timer = 1500,
+                    HeightAuto = false,
+                    Width = "300px",
+                    ImageHeight = 10,
+                    ImageWidth = 10,
+                    ShowCloseButton = false
+                });
+
+                nav.NavigateTo("/Karyawan");
+            }
+            else
+            {
+                throw new SystemException("Data Tidak Tersimpan");
+            }
+        }
+        catch (Exception ex)
+        {
+            await Swal.FireAsync("Oops...", ex.Message, "error");
+        }
+
     }
 
 }

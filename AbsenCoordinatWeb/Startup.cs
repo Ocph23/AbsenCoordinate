@@ -1,21 +1,18 @@
 using AbsenCoordinatWeb.Areas.Identity;
 using AbsenCoordinatWeb.Data;
+using AbsenCoordinatWeb.Models;
 using Blazored.Modal;
+using CurrieTechnologies.Razor.SweetAlert2;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace AbsenCoordinatWeb
 {
@@ -35,14 +32,41 @@ namespace AbsenCoordinatWeb
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseMySQL(
                     Configuration.GetConnectionString("DefaultConnection")));
+
+            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+
+            services.AddControllers()
+              .AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+              );
+
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+            // For Identity  
+
+            // Adding Authentication  
+            services.AddAuthentication()
+
+            // Adding Jwt Bearer  
+            .AddJwtBearer(options =>
+            {
+                options.SaveToken = true;
+                options.RequireHttpsMetadata = false;
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["AppSettings:Secret"]))
+                };
+            });
+
+            services.AddSweetAlert2();
             services.AddRazorPages();
             services.AddServerSideBlazor().AddHubOptions(config => config.MaximumReceiveMessageSize = 1048576); ;
             services.AddHttpContextAccessor();
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
-            services.AddSingleton<WeatherForecastService>();
+            services.AddScoped<UserService>();
             services.AddScoped<KaryawanService>();
             services.AddScoped<TempatService>();
             services.AddScoped<CutiService>();

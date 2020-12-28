@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AbsenCoordinateMobile.Views.CutiDetailPage"
+             Title="{Binding Title}">
+
+    <StackLayout Spacing="3" Padding="15" Margin="20">
+        <Label Text="Persetujuan Cuti" FontSize="Large" Margin="0,0,0,20" />
+        <Label Margin="0,20,0,0"  Text="Status" FontSize="Small" />
+        <Entry IsEnabled="False" Text="{Binding Model.StatusPengajuan, Mode=TwoWay}" FontSize="Medium" />
+        <StackLayout IsVisible="{Binding ShowTanggal}">
+            <Label Margin="0,20,0,0"  Text="Mulai Cuti" FontSize="Small" />
+            <DatePicker IsEnabled="False" Date="{Binding Model.Mulai, Mode=TwoWay}" FontSize="Medium" />
+            <Label Margin="0,20,0,0"  Text="Hingga" FontSize="Small" />
+            <DatePicker IsEnabled="False" Date="{Binding Model.Berakhir, Mode=TwoWay}" FontSize="Medium" />
+        </StackLayout>
+        <Label Margin="0,20,0,0"  Text="Alasan Cuti" FontSize="Small" />
+        <Editor IsEnabled="False" Text="{Binding Model.CatatanPersetujuan, Mode=TwoWay}" AutoSize="TextChanges" FontSize="Medium" Margin="0" />
+      
+    </StackLayout>
+
+</ContentPage>

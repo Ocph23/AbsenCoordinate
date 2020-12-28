@@ -1,0 +1,136 @@
+﻿@page "/report/absen/{dari}/{sampai}"
+@layout ReportLayout
+
+@using AbsenCoordinatWeb.Data
+@using AbsenCoordinatWeb.Models
+@inject AbsenService absenService
+@inject CutiService cutiService
+@inject IJSRuntime  JS
+
+<h3>Laporan Absen</h3>
+
+
+@if (absens == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <h6>@(data.Dari.Value.ToString("dd MMM yyyy") +" s/d " + data.Sampai.Value.ToString("dd MMM yyyy"))</h6>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nama Karyawan</th>
+                <th>NIK</th>
+                <th>Hadir</th>
+                <th>Alpha</th>
+                <th>Sakit</th>
+                <th>Izin</th>
+                <th>Cuti</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in absens)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.NIK</td>
+                    <td>@item.Hadir</td>
+                    <td>@item.Alpha</td>
+                    <td>@item.Sakit</td>
+                    <td>@item.Izin</td>
+                    <td>@item.Cuti</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+
+@code {
+
+
+    [Parameter]
+    public string dari { get; set; }
+
+
+    [Parameter]
+    public string sampai { get; set; }
+
+    private List<AbsenReportModel> absens;
+
+    private QueryAbsenParam data;
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        data = new QueryAbsenParam { Dari = Convert.ToDateTime(dari), Sampai = Convert.ToDateTime(sampai) };
+        var source = await absenService.Get(data);
+        var cutiResult = await cutiService.Get();
+        absens = new List<AbsenReportModel>();
+        var sourceGroup = source.GroupBy(x => x.KaryawanId).ToList();
+        foreach (var item in sourceGroup)
+        {
+            var itemData = item.FirstOrDefault();
+            AbsenReportModel model = new AbsenReportModel
+            {
+                Name = itemData.Karyawan.Name,
+                NIK = itemData.Karyawan.NIK,
+                Hadir = item.Where(x => x.Status == AbsenStatus.Hadir).Count(),
+                Alpha = item.Where(x => x.Status == AbsenStatus.Alpha).Count(),
+                Sakit = item.Where(x => x.Status == AbsenStatus.Sakit).Count(),
+                Izin = item.Where(x => x.Status == AbsenStatus.Izin).Count(),
+                Cuti = item.Where(x => x.Status == AbsenStatus.Cuti).Count(),
+
+            };
+            absens.Add(model);
+        }
+
+
+        foreach (var item in cutiResult.Where(x=>x.Persetujuan!=null && (x.Persetujuan.Mulai >= data.Dari || x.Persetujuan.Berakhir >= data.Dari)))
+        {
+            int total = 0;
+            if (item.Persetujuan.Mulai >= data.Dari && item.Persetujuan.Berakhir >= data.Sampai)
+            {
+                total =(Int32)data.Sampai.Value.Subtract(item.Persetujuan.Mulai.Value).TotalDays;
+            }
+
+            if (item.Persetujuan.Mulai >= data.Dari && item.Persetujuan.Berakhir < data.Sampai)
+            {
+                total = (Int32)item.Persetujuan.Berakhir.Value.Subtract(item.Persetujuan.Mulai.Value).TotalDays;
+            }
+
+
+            if (item.Persetujuan.Mulai < data.Dari && item.Persetujuan.Berakhir <= data.Sampai)
+            {
+                total = (Int32)item.Berakhir.Value.Subtract(data.Dari.Value).TotalDays;
+            }
+
+            if (item.Persetujuan.Mulai < data.Dari && item.Persetujuan.Berakhir > data.Sampai)
+            {
+                total = (Int32)data.Sampai.Value.Subtract(data.Sampai.Value).TotalDays;
+            }
+
+
+            var ab = absens.Where(x => x.Name == item.Karyawan.Name).FirstOrDefault();
+            ab.Cuti = total;
+
+
+
+        }
+
+
+
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+
+        await JS.InvokeVoidAsync("showprint", null);
+    }
+
+
+}

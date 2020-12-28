@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AbsenCoordinateMobile.Views.CutiView"
+             Title="{Binding Title}"
+             xmlns:local="clr-namespace:AbsenCoordinateMobile.ViewModels"  
+             xmlns:model="clr-namespace:AbsenCoordinateMobile.Models"  
+             x:Name="BrowseItemsPage">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Baru" Command="{Binding AddItemCommand}" />
+    </ContentPage.ToolbarItems>
+   
+    <RefreshView x:DataType="local:CutiViewModel" Command="{Binding LoadItemsCommand}" IsRefreshing="{Binding IsBusy, Mode=TwoWay}">
+        <CollectionView x:Name="ItemsListView"
+                ItemsSource="{Binding Items}"
+                SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid BackgroundColor="WhiteSmoke">
+                        <StackLayout BackgroundColor="White" Margin="5" Padding="10" x:DataType="model:Cuti">
+                            <Label Text="{Binding TanggalPengajuan, StringFormat='{}{0:dd-MM-yyyy}'}" HorizontalOptions="EndAndExpand" LineBreakMode="NoWrap" 
+                                   Style="{DynamicResource ListItemTextStyle}" FontSize="16" />
+
+                            <Label LineBreakMode="NoWrap" 
+                                   Style="{DynamicResource ListItemTextStyle}" FontSize="16">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="Mulai Cuti               : "></Span>
+                                        <Span Text="{Binding Mulai, StringFormat='{}{0:dd-MM-yyyy}'}" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <Label LineBreakMode="NoWrap" 
+                                   Style="{DynamicResource ListItemTextStyle}" FontSize="16">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="Berakhir Cuti          : "></Span>
+                                        <Span Text="{Binding Berakhir, StringFormat='{}{0:dd-MM-yyyy}'}" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+
+                            <Label LineBreakMode="NoWrap" 
+                                   Style="{DynamicResource ListItemTextStyle}" FontSize="16">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="Status Pengajuan : "></Span>
+                                        <Span Text="{Binding Status}"  />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <Label Text="Alasan Cuti            :" LineBreakMode="WordWrap" Style="{DynamicResource ListItemDetailTextStyle}" FontSize="16" />
+                            <Label Text="{Binding AlasanCuti}" Margin="20,0" LineBreakMode="WordWrap" Style="{DynamicResource ListItemDetailTextStyle}" FontSize="13" />
+                            <StackLayout.GestureRecognizers>
+                                <TapGestureRecognizer 
+                                NumberOfTapsRequired="1"
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:CutiViewModel}}, Path=ItemTapped}"		
+                                CommandParameter="{Binding .}">
+                                </TapGestureRecognizer>
+                            </StackLayout.GestureRecognizers>
+                        </StackLayout>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </RefreshView>
+</ContentPage>

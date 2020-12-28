@@ -9,6 +9,9 @@
 
 @inject TempatService tempatService
 @inject KaryawanService karyawanService
+@inject SweetAlertService Swal
+
+@attribute [Authorize(Roles = "Hrd")]
 
 
 <h4>Tempat Absen dan Data Karyawan</h4>
@@ -26,18 +29,18 @@
 }
 else
 {
-<div style="margin:20px; width:200px">
-    <div class="form-group">
-        <label>Pilih Karyawan</label>
-        <select class="form-control" @onchange="add">
-            <option value="">None</option>
-            @foreach (var item in karyawans.Where(x => !tempat.Karyawans.Any(z => z.KaryawanId.Equals(x.Id))))
-            {
-                <option value="@item.Id">@item.Name</option>
-            }
-        </select>
+    <div style="margin:20px; width:200px">
+        <div class="form-group">
+            <label>Pilih Karyawan</label>
+            <select class="form-control" @onchange="add">
+                <option value="">None</option>
+                @foreach (var item in karyawans.Where(x => !tempat.Karyawans.Any(z => z.KaryawanId.Equals(x.Id))))
+                {
+                    <option value="@item.Id">@item.Name</option>
+                }
+            </select>
+        </div>
     </div>
-</div>
 
     <table class="table">
         <thead>
@@ -68,8 +71,8 @@ else
 
 @code {
 
-        [Parameter]
-        public string Id { get; set; }
+    [Parameter]
+    public string Id { get; set; }
 
     private GoogleMap map1;
     private MapOptions mapOptions;
@@ -118,23 +121,49 @@ else
 
     async Task remove(TempatDetail karyawan)
     {
-        bool result = await tempatService.DeleteKaryawan(tempat.Id, karyawan.KaryawanId);
-        if (result)
+        try
         {
-            tempat.Karyawans.Remove(karyawan);
+            bool result = await tempatService.DeleteKaryawan(tempat.Id, karyawan.KaryawanId);
+            if (result)
+            {
+                tempat.Karyawans.Remove(karyawan);
+            }
+        }
+        catch (Exception ex)
+        {
+            await Swal.FireAsync("Oops...", ex.Message, "error");
         }
     }
 
     async void add(ChangeEventArgs obj)
     {
-        var karyawanId =Convert.ToInt32(obj.Value) ;
-        var karyawan = karyawans.SingleOrDefault(x => x.Id == karyawanId);
-        if (karyawan != null)
+        try
         {
-            bool result = await tempatService.AddKaryawan(tempat.Id, karyawan.Id);
-            if (result)
+            var karyawanId = Convert.ToInt32(obj.Value);
+            var karyawan = karyawans.SingleOrDefault(x => x.Id == karyawanId);
+            if (karyawan != null)
             {
+                bool result = await tempatService.AddKaryawan(tempat.Id, karyawan.Id);
+                if (result)
+                {
+                    await Swal.FireAsync(new SweetAlertOptions
+                    {
+                        Position = SweetAlertPosition.TopEnd,
+                        Text = " Data Berhasil Disimpan !",
+                        Icon = SweetAlertIcon.Success,
+                        Timer = 1500,
+                        ShowCloseButton = false
+                    });
+
+                    return;
+                }
             }
+
+            throw new SystemException("Data Tidak Tersimpan !");
+        }
+        catch (Exception ex)
+        {
+            await Swal.FireAsync("Oops...", ex.Message, "error");
         }
     }
 

@@ -5,15 +5,18 @@
 @using GoogleMapsComponents.Maps
 @using AbsenCoordinatWeb.Data
 
+
+@attribute [Authorize(Roles = "Hrd")]
 @inject TempatService tempatService
 @inject NavigationManager nav
+@inject SweetAlertService Swal
 
 @inject IModalService Modal
 @inject IJSRuntime JS;
 
 <h3>TEMPAT ABSEN</h3>
 
-<button style="margin:5px" @onclick="ShowMap"><span style="margin-right:10px" class="oi oi-eye" ></span>Map</button>
+<button style="margin:5px" @onclick="ShowMap"><span style="margin-right:10px" class="oi oi-eye"></span>Map</button>
 @if (IsEdit)
 {
     <div style="height:@heightMap;">
@@ -46,13 +49,13 @@ else
                     <td>@item.Address</td>
                     <td>
                         <button @onclick="()=>edit(item)" class="btn btn-warning">
-                            <span style="margin-right:10px" class="oi oi-pencil" ></span>
+                            <span style="margin-right:10px" class="oi oi-pencil"></span>
                         </button>
                         <button @onclick="()=>remove(item)" class="btn btn-danger">
-                            <span style="margin-right:10px" class="oi oi-delete" ></span>
+                            <span style="margin-right:10px" class="oi oi-delete"></span>
                         </button>
                         <button @onclick="()=>detail(item)" class="btn btn-info">
-                            <span style="margin-right:10px" class="oi oi-menu" ></span>
+                            <span style="margin-right:10px" class="oi oi-menu"></span>
                         </button>
                     </td>
                 </tr>
@@ -76,7 +79,7 @@ else
     string ModalClass;
 
 
-    async void detail (TempatView item)
+    async void detail(TempatView item)
     {
         nav.NavigateTo($"map/detail/{item.Id}");
     }
@@ -86,7 +89,7 @@ else
         SelectedMarker = item;
         var parameters = new ModalParameters();
         parameters.Add("Tempat", item);
-        var modal=  Modal.Show<ModalEditTempat>("Edit Tempat", parameters);
+        var modal = Modal.Show<ModalEditTempat>("Edit Tempat", parameters);
         var result = await modal.Result;
         if (!result.Cancelled)
         {
@@ -97,7 +100,7 @@ else
         }
         else
         {
-            if(item.Id<=0)
+            if (item.Id <= 0)
             {
                 await item.Marker.SetMap(null);
                 markers.Remove(item);
@@ -113,8 +116,9 @@ else
         var deleted = await tempatService.Delete(item.Id);
         if (deleted)
         {
-            await  item.Marker.SetMap(null);
+            await item.Marker.SetMap(null);
             markers.Remove(item);
+
         }
 
         StateHasChanged();

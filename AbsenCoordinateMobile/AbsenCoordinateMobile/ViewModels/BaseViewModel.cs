@@ -8,9 +8,11 @@ using Xamarin.Forms;
 
 namespace AbsenCoordinateMobile.ViewModels
 {
-    public class BaseViewModel : INotifyPropertyChanged
+    public class BaseViewModel : BaseNotify
     {
         public IDataStore<Item> DataStore => DependencyService.Get<IDataStore<Item>>();
+        public IDataServices DataService => DependencyService.Get<IDataServices>();
+        public MyCurrentPosition CurrentPositon => DependencyService.Get<MyCurrentPosition>();
 
         bool isBusy = false;
         public bool IsBusy
@@ -26,6 +28,11 @@ namespace AbsenCoordinateMobile.ViewModels
             set { SetProperty(ref title, value); }
         }
 
+    }
+
+
+    public class BaseNotify : INotifyPropertyChanged
+    {
         protected bool SetProperty<T>(ref T backingStore, T value,
             [CallerMemberName] string propertyName = "",
             Action onChanged = null)

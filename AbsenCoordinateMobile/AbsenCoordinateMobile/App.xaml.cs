@@ -14,8 +14,26 @@ namespace AbsenCoordinateMobile
             InitializeComponent();
 
             DependencyService.Register<MockDataStore>();
-            MainPage = new AppShell();
+            DependencyService.Register<DataServices>();
+            DependencyService.Register<MyCurrentPosition>();
+            Load();
         }
+
+        private  void Load()
+        {
+
+            MainPage = new Views.LoginPage();
+
+            if (Account.UserIsLogin)
+            {
+                    MainPage = new AppShell();
+            }
+            else
+            {
+                MainPage = new Views.LoginPage();
+            }
+        }
+
 
         protected override void OnStart()
         {

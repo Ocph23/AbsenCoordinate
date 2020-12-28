@@ -7,9 +7,10 @@
 @inject CutiService cutiService
 @inject NavigationManager nav
 
+@attribute [Authorize(Roles = "Hrd")]
+
 <h4>CUTI</h4>
-<p>Dafar Cuti dan Pengajuan Cuti</p>
-<a href="/cuti/create"><span class="oi oi-plus" aria-hidden="true"></span></a>
+<p>Dafar Pengajuan Cuti</p>
 
 @if (cuties == null)
 {
@@ -21,27 +22,26 @@ else
         <thead>
             <tr>
                 <th>Pengajuan</th>
-                <th>Status</th>
                 <th>Karyawan</th>
                 <th>Mulai Cuti</th>
-                <th>Sampai</th>
+                <th>Berakhir</th>
                 <th>Disetujui</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
             @foreach (var item in cuties)
             {
-            <tr>
-                <td>@item.TanggalPengajuan</td>
-                <td>@item.StatusPengajuan</td>
-                <td>@item.Karyawan.Name</td>
-                <td>@item.Mulai</td>
-                <td>@item.Berakhir</td>
-                <td>@item.DisetujuiOleh.Name</td>
-                <td>
-                    <button @onclick="()=>edit(item.Id)" class="btn btn-warning"><i class="oi oi-pencil"></i></button>
-                </td>
-            </tr>
+                <tr>
+                    <td>@item.TanggalPengajuan</td>
+                    <td>@item.Karyawan.Name</td>
+                    <td>@item.Mulai</td>
+                    <td>@item.Berakhir</td>
+                    <td>@(item.Persetujuan==null?"":item.Persetujuan.StatusPengajuan.ToString())</td>
+                    <td>
+                        <button @onclick="()=>edit(item.Id)" class="btn btn-warning"><i class="oi oi-pencil"></i></button>
+                    </td>
+                </tr>
             }
         </tbody>
     </table>

@@ -1,0 +1,59 @@
+﻿@page "/report/karyawan"
+@layout ReportLayout
+
+@using AbsenCoordinatWeb.Data
+@using AbsenCoordinatWeb.Models
+@inject KaryawanService karyawanService
+@inject IJSRuntime  JS
+
+<h3>Laporan Data Karyawan </h3>
+<h4>Per @DateTime.Now.ToString("dd MMM yyyy")</h4>
+
+@if (karyawans == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table style="margin-top:30px" class="table">
+        <thead>
+            <tr>
+                <th>Nama</th>
+                <th>NIK</th>
+                <th>Unit Kerja</th>
+                <th>Lokasi Kerja</th>
+                <th>Jabatan</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in karyawans)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.NIK</td>
+                    <td>@item.UnitKerja</td>
+                    <td>@item.LokasiKerja</td>
+                    <td>@item.Jabatan</td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+
+@code {
+    private IEnumerable<Karyawan> karyawans;
+
+    protected override async Task OnInitializedAsync()
+    {
+        karyawans = await karyawanService.Get();
+       
+    }
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            await JS.InvokeVoidAsync("showprint", null);
+        }
+}

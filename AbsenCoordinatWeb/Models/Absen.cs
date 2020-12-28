@@ -12,8 +12,9 @@ namespace AbsenCoordinatWeb.Models
         public int Id { get; set; }
         public DateTime? Masuk { get; set; }
         public DateTime? Pulang { get; set; }
+        public AbsenStatus Status { get; set; }
+        public string Keterangan { get; set; }
         public int KaryawanId { get; set; }
-
         public virtual Karyawan Karyawan { get; set; }
 
     }

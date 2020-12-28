@@ -14,7 +14,7 @@ namespace AbsenCoordinatWeb.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.8")
+                .HasAnnotation("ProductVersion", "3.1.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("AbsenCoordinatWeb.Models.Absen", b =>
@@ -26,11 +26,17 @@ namespace AbsenCoordinatWeb.Migrations
                     b.Property<int>("KaryawanId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Keterangan")
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("Masuk")
                         .HasColumnType("datetime");
 
                     b.Property<DateTime?>("Pulang")
                         .HasColumnType("datetime");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -45,27 +51,26 @@ namespace AbsenCoordinatWeb.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("Berakhir")
-                        .HasColumnType("datetime");
+                    b.Property<string>("AlasanCuti")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.Property<int>("DisetuiOlehId")
-                        .HasColumnType("int");
+                    b.Property<DateTime?>("Berakhir")
+                        .IsRequired()
+                        .HasColumnType("datetime");
 
                     b.Property<int>("KaryawanId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("Mulai")
+                        .IsRequired()
                         .HasColumnType("datetime");
 
-                    b.Property<int>("StatusPengajuan")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("TanggalPengajuan")
+                        .IsRequired()
                         .HasColumnType("datetime");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DisetuiOlehId");
 
                     b.HasIndex("KaryawanId");
 
@@ -90,7 +95,19 @@ namespace AbsenCoordinatWeb.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("LokasiKerja")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("NIK")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UnitKerja")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -100,6 +117,46 @@ namespace AbsenCoordinatWeb.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Karyawans");
+                });
+
+            modelBuilder.Entity("AbsenCoordinatWeb.Models.PersetujuanCuti", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("Berakhir")
+                        .IsRequired()
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("CatatanPersetujuan")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("CutiId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KaryawanId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("Mulai")
+                        .IsRequired()
+                        .HasColumnType("datetime");
+
+                    b.Property<int>("StatusPengajuan")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("TanggalPersetujuan")
+                        .HasColumnType("datetime");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CutiId")
+                        .IsUnique();
+
+                    b.HasIndex("KaryawanId");
+
+                    b.ToTable("Persetujuan");
                 });
 
             modelBuilder.Entity("AbsenCoordinatWeb.Models.Tempat", b =>
@@ -353,9 +410,18 @@ namespace AbsenCoordinatWeb.Migrations
 
             modelBuilder.Entity("AbsenCoordinatWeb.Models.Cuti", b =>
                 {
-                    b.HasOne("AbsenCoordinatWeb.Models.Karyawan", "DisetujuiOleh")
+                    b.HasOne("AbsenCoordinatWeb.Models.Karyawan", "Karyawan")
                         .WithMany()
-                        .HasForeignKey("DisetuiOlehId")
+                        .HasForeignKey("KaryawanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AbsenCoordinatWeb.Models.PersetujuanCuti", b =>
+                {
+                    b.HasOne("AbsenCoordinatWeb.Models.Cuti", "Permohonan")
+                        .WithOne("Persetujuan")
+                        .HasForeignKey("AbsenCoordinatWeb.Models.PersetujuanCuti", "CutiId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

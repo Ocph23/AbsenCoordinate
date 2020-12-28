@@ -11,9 +11,10 @@ namespace AbsenCoordinateMobile
         public AppShell()
         {
             InitializeComponent();
-            Routing.RegisterRoute(nameof(ItemDetailPage), typeof(ItemDetailPage));
-            Routing.RegisterRoute(nameof(NewItemPage), typeof(NewItemPage));
+            Routing.RegisterRoute(nameof(CutiDetailPage), typeof(CutiDetailPage));
+            Routing.RegisterRoute(nameof(NewCutiPage), typeof(NewCutiPage));
         }
 
+       
     }
 }

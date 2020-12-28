@@ -1,0 +1,160 @@
+﻿@page "/cuti/change/{id}"
+
+@using AbsenCoordinatWeb.Models
+@using AbsenCoordinatWeb.Data
+
+@inject CutiService cutiService
+@inject NavigationManager nav
+@inject AuthenticationStateProvider auth
+@inject SweetAlertService Swal
+
+@attribute [Authorize(Roles = "Hrd")]
+<h4>Data Pengajuan Cuti</h4>
+
+@if (Model == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="Model">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>NIK</label>
+                    <InputText readonly class="form-control" @bind-Value="Model.Karyawan.NIK" />
+                </div>
+
+                <div class="form-group">
+                    <label>Nama Karyawan</label>
+                    <InputText readonly class="form-control" @bind-Value="Model.Karyawan.Name" />
+                </div>
+                <div class="form-group">
+                    <label>Tanggal Pengajuan</label>
+                    <InputDate readonly class="form-control" @bind-Value="Model.TanggalPengajuan" />
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="form-group">
+                    <label>Mulai</label>
+                    <InputDate readonly class="form-control" @bind-Value="Model.Mulai" />
+                </div>
+
+                <div class="form-group">
+                    <label>Hingga</label>
+                    <InputDate readonly class="form-control" @bind-Value="Model.Berakhir" />
+                </div>
+                <div class="form-group">
+                    <label>Alasan Cuti/ Deskripsi</label>
+                    <InputTextArea readonly class="form-control" @bind-Value="Model.AlasanCuti" />
+                </div>
+
+
+            </div>
+        </div>
+
+    </EditForm>
+
+    <h4 style="margin-top:20px">Persetujuan</h4>
+    <EditForm Model="Model.Persetujuan" OnValidSubmit="@HandleValidSubmit">
+        <div class=" col-md-6">
+            <div class="form-group">
+                <label>Status Persetujuan</label>
+                <InputSelect class="form-control" @bind-Value="Model.Persetujuan.StatusPengajuan">
+                    @foreach (var value in Enum.GetValues(typeof(StatusPengajuanCuti)))
+                        {
+                            if (value.ToString() != "None")
+                            {
+                            <option>@value</option>
+                            }
+                        }
+                </InputSelect>
+            </div>
+
+            @if (Model.Persetujuan.StatusPengajuan == StatusPengajuanCuti.Disetujui)
+            {
+                <div class="form-group">
+                    <label>Mulai</label>
+                    <InputDate class="form-control" @bind-Value="Model.Persetujuan.Mulai" />
+                </div>
+                <div class="form-group">
+                    <label>Hingga</label>
+                    <InputDate class="form-control" @bind-Value="Model.Persetujuan.Berakhir" />
+                </div>
+            }
+
+            <div class="form-group">
+                <label>Catatan Persetuajuan</label>
+                <InputTextArea class="form-control" @bind-Value="Model.Persetujuan.CatatanPersetujuan" />
+            </div>
+            <div class="form-group">
+                <label>Tanggal Persetujuan</label>
+                <InputDate class="form-control" @bind-Value="Model.Persetujuan.TanggalPersetujuan" />
+            </div>
+        </div>
+        <button style="text-align:right" type="submit" class="btn btn-success">Simpan</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+    Cuti Model { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var id = Convert.ToInt32(Id);
+        Model = await cutiService.Get(id);
+        if (Model!=null && Model.Persetujuan == null)
+            Model.Persetujuan = new PersetujuanCuti() { Mulai = Model.Mulai, Berakhir = Model.Berakhir, TanggalPersetujuan = DateTime.Now };
+
+        else
+        {
+            await Swal.FireAsync(new SweetAlertOptions
+            {
+                Position = SweetAlertPosition.TopEnd,
+                Text = " Data Tidak Dapat Diubah !",
+                Icon = SweetAlertIcon.Success,
+                Timer = 1500,
+                HeightAuto = false,
+                ShowCloseButton = false
+            });
+            back();
+        }
+    }
+
+    async void HandleValidSubmit()
+    {
+        try
+        {
+            var authstate = await auth.GetAuthenticationStateAsync();
+
+            var result = await cutiService.Approve(authstate.User.Identity.Name, Model);
+
+            if (result != null)
+            {
+                await Swal.FireAsync(new SweetAlertOptions
+                {
+                    Position = SweetAlertPosition.TopEnd,
+                    Text = " Data Berhasil Disimpan !",
+                    Icon = SweetAlertIcon.Success,
+                    Timer = 1500,
+                    HeightAuto = false,
+                    ShowCloseButton = false
+                });
+                nav.NavigateTo("/cuti");
+            }
+        }
+        catch (Exception ex)
+        {
+            await Swal.FireAsync("Oops...", ex.Message, "error");
+        }
+
+    }
+
+
+    void back()
+    {
+        nav.NavigateTo("/cuti");
+    }
+}

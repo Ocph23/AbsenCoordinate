@@ -1,0 +1,93 @@
+﻿@using AbsenCoordinatWeb.Models
+@using AbsenCoordinatWeb.Data
+
+
+@attribute [Authorize(Roles = "Hrd")]
+@inject AbsenService absenService
+@inject KaryawanService karyawanService
+@inject SweetAlertService swal
+
+<div style="width:400px">
+    <form @onsubmit ="@HandleValidSubmit">
+        <div class="mb-3">
+            <label for="nama" class="form-label">Karyawan</label>
+            <select class="form-control" @onchange="ChangeKaryawan">
+                <option value="">None</option>
+                @foreach (var item in karyawans)
+                {
+                    <option value="@item.Id">@item.Name</option>
+                }
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="nama" class="form-label">Status</label>
+            <select class="form-control" @onchange="ChangeStatus">
+                <option value="">None</option>
+                @foreach (var item in dataStatus)
+                {
+                    <option value="@item">@item.ToString()</option>
+                }
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Tanggal</label>
+            <input type="date" class="form-control" id="alamat" @bind="Model.Masuk" />
+        </div>
+        <div class="form-group">
+            <label>Keterangan</label>
+            <textarea class="form-control" id="alamat" @bind="Model.Keterangan" />
+        </div>
+        <button type="submit">Simpan</button>
+    </form>
+</div>
+
+
+@code {
+
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+    public Absen Model { get; set; } = new Absen();
+
+    private List<AbsenStatus> dataStatus = new List<AbsenStatus>();
+
+    private IEnumerable<Karyawan> karyawans;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        dataStatus.Add(AbsenStatus.Alpha);
+        dataStatus.Add(AbsenStatus.Sakit);
+        dataStatus.Add(AbsenStatus.Izin);
+        karyawans = await karyawanService.Get();
+    }
+
+    void ChangeKaryawan(ChangeEventArgs data)
+    {
+        Model.KaryawanId = Convert.ToInt32(data.Value);
+    }
+
+    void ChangeStatus(ChangeEventArgs data)
+    {
+        Model.Status =(AbsenStatus) Enum.Parse(typeof(AbsenStatus),data.Value.ToString());
+    }
+
+    async void HandleValidSubmit()
+    {
+
+        try
+        {
+            await absenService.AddAbsen(Model);
+            await BlazoredModal.Close();
+        }
+        catch (Exception ex)
+        {
+            await swal.FireAsync("Oppsss ...", ex.Message, "error");
+        }
+
+    }
+
+    async Task Cancel()
+    {
+        await BlazoredModal.Cancel();
+    }
+}

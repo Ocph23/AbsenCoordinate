@@ -59,6 +59,7 @@
     <Reference Include="Mono.Android" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Numerics.Vectors" />
     <Reference Include="System.Xml.Linq" />
@@ -75,6 +76,8 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HelperToas.cs" />
+    <Compile Include="HTTPClientHandlerCreationService.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

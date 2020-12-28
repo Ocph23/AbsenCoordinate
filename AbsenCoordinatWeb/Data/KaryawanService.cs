@@ -10,15 +10,13 @@ namespace AbsenCoordinatWeb.Data
 {
     public class KaryawanService
     {
-        private ApplicationDbContext _db;
-        private UserManager<IdentityUser> _userManager;
-        private RoleManager<IdentityRole> _roleManager;
+        private readonly ApplicationDbContext _db;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public KaryawanService(ApplicationDbContext db, UserManager<IdentityUser> usermanager, RoleManager<IdentityRole> rolemanager)
+        public KaryawanService(ApplicationDbContext db, UserManager<IdentityUser> usermanager)
         {
             _db = db;
             _userManager = usermanager;
-            _roleManager = rolemanager;
         }
 
         public Task<IEnumerable<Karyawan>> Get()
@@ -41,11 +39,14 @@ namespace AbsenCoordinatWeb.Data
             {
                 if (model.Id <= 0)
                 {
-                    var user = new IdentityUser(model.Email);
+                    var user = new IdentityUser() {UserName=model.Email, Email=model.Email, 
+                        EmailConfirmed=true, SecurityStamp = Guid.NewGuid().ToString() };
                     var identity= await _userManager.CreateAsync(user,"Sony@77");
                     if (identity.Succeeded)
                     {
                         await _userManager.AddToRoleAsync(user, "Karyawan");
+                        if (model.IsHRD)
+                            await _userManager.AddToRoleAsync(user, "Hrd");
                         model.UserId = user.Id;
                         _db.Karyawans.Add(model);
                     }

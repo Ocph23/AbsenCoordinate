@@ -13,4 +13,9 @@ namespace AbsenCoordinatWeb.Models
     {
         None=-1, Baru, Disetujui, Ditolak=-2
     }
+
+    public enum AbsenStatus
+    {
+        Hadir, Alpha, Sakit, Izin, Cuti
+    }
 }

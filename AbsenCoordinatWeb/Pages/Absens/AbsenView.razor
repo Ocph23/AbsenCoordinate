@@ -2,13 +2,18 @@
 
 @using AbsenCoordinatWeb.Models
 @using AbsenCoordinatWeb.Data
+@using AbsenCoordinatWeb.Pages.Absens
+
+@inject IModalService Modal
+@inject IJSRuntime JS;
 
 @inject AbsenService absenService
 @inject NavigationManager nav
+@attribute [Authorize(Roles = "Hrd")]
 
-<h4>ABSEN</h4>
-<p>Dafar Absen</p>
-<a href="/absen/create"><span class="oi oi-plus" aria-hidden="true"></span></a>
+
+<h4>ABSEN HARI INI</h4>
+<p>Dafar Absen Karyawan</p>
 
 @if (absens == null)
 {
@@ -16,12 +21,31 @@
 }
 else
 {
+
+    <EditForm Model="data" OnValidSubmit="FilterAbsen" style="margin-bottom:20px">
+        <InputDate @bind-Value="data.Dari"></InputDate>
+        s/d
+        <InputDate @bind-Value="data.Sampai"></InputDate>
+        <button type="submit"> <i class="fa fa-search"></i></button>
+    </EditForm>
+
+    <div class="row" style="display:flex; align-items:end">
+        <button class="btn" @onclick="AddAbsen"><i class="fa fa-plus"></i></button>
+        @if (data.Dari != null && data.Sampai != null)
+        {
+            <button class="btn" @onclick="Print"><i class="fa fa-print"></i></button>
+        }
+    </div>
+
     <table class="table">
         <thead>
             <tr>
-                <th>Nama</th>
+                <th>Tanggal</th>
+                <th>Nama Karyawan</th>
+                <th>Status</th>
                 <th>Masuk</th>
                 <th>Pulang</th>
+                <th>Keterangan</th>
                 <th></th>
             </tr>
         </thead>
@@ -29,12 +53,20 @@ else
             @foreach (var item in absens)
             {
                 <tr>
+                    <td>@item.Masuk.Value.ToString("dd-MM-yyyy")</td>
                     <td>@item.Karyawan.Name</td>
-                    <td>@item.Masuk</td>
-                    <td>@item.Pulang</td>
-                    <td>
-                        <button @onclick="()=>edit(item.Id)" class="btn btn-warning">Edit</button>
-                    </td>
+                    <td>@item.Status</td>
+                    @if (item.Status == AbsenStatus.Hadir)
+                    {
+                        <td>@item.Masuk.Value.ToString("HH:mm:ss")</td>
+                        <td>@(item.Pulang==null?"":item.Pulang.Value.ToString("HH:mm:ss"))</td>
+                    }
+                    else
+                    {
+                        <th></th>
+                        <th></th>
+                    }
+                    <td>@item.Keterangan</td>
                 </tr>
             }
         </tbody>
@@ -43,14 +75,47 @@ else
 
 @code {
     private IEnumerable<Absen> absens;
-
+    QueryAbsenParam data = new QueryAbsenParam();
     protected override async Task OnInitializedAsync()
     {
-        absens = await absenService.Get();
+        absens = await absenService.GetToday();
     }
 
     void edit(int id)
     {
         nav.NavigateTo($"/cuti/change/{id}");
     }
+
+    async void FilterAbsen()
+    {
+        if (data.Dari is null || data.Sampai is null)
+            return;
+
+        if (data.Dari > data.Sampai)
+            return;
+        absens = await absenService.Get(data);
+    }
+
+
+    void Print()
+    {
+        nav.NavigateTo($"/report/absen/{dateParam(data.Dari.Value)}/{dateParam(data.Sampai.Value)}");
+    }
+
+
+    async void AddAbsen()
+    {
+        var modal = Modal.Show<ModalAddAbsen>("Edit Tempat");
+        var result = await modal.Result;
+    }
+
+    string dateParam(DateTime date)
+    {
+
+
+        return $"{date.Day}-{date.Month}-{date.Year}";
+
+    }
+
+
 }

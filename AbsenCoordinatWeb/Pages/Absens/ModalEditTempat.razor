@@ -1,7 +1,9 @@
 ﻿@using AbsenCoordinatWeb.Models
 @using AbsenCoordinatWeb.Data
 
-@inject TempatService tempatService 
+
+@attribute [Authorize(Roles = "Hrd")]
+@inject TempatService tempatService
 
 <div style="width:400px">
     <EditForm Model="@Tempat" OnValidSubmit="@HandleValidSubmit">
@@ -24,18 +26,18 @@
 
 
 @code {
-    [Parameter] public TempatView Tempat{ get; set; }
+    [Parameter] public TempatView Tempat { get; set; }
 
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
 
 
-        protected override Task OnInitializedAsync()
-        {
-        
-            return base.OnInitializedAsync();
-        }
+    protected override Task OnInitializedAsync()
+    {
 
-        async void HandleValidSubmit()
+        return base.OnInitializedAsync();
+    }
+
+    async void HandleValidSubmit()
     {
 
         try

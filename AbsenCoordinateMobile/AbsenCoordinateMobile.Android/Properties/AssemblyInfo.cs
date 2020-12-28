@@ -35,6 +35,7 @@ using Android.App;
 [assembly: UsesPermission(Android.Manifest.Permission.AccessCoarseLocation)]
 [assembly: UsesPermission(Android.Manifest.Permission.ControlLocationUpdates)]
 [assembly: UsesPermission(Android.Manifest.Permission.AccessLocationExtraCommands)]
+[assembly: Application(UsesCleartextTraffic = true)]
 
 [assembly: UsesFeature("android.hardware.location", Required = false)]
 [assembly: UsesFeature("android.hardware.location.gps", Required = false)]

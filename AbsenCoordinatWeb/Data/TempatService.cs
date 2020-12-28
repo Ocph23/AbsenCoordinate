@@ -1,4 +1,5 @@
 ﻿using AbsenCoordinatWeb.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,11 +10,13 @@ namespace AbsenCoordinatWeb.Data
 {
     public class TempatService
     {
-        private ApplicationDbContext _db;
+        private readonly ApplicationDbContext _db;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public TempatService(ApplicationDbContext dbcontext)
+        public TempatService(ApplicationDbContext dbcontext, UserManager<IdentityUser> userManager)
         {
             _db = dbcontext;
+            _userManager = userManager;
         }
 
 
@@ -103,7 +106,21 @@ namespace AbsenCoordinatWeb.Data
             }
         }
 
+        internal async Task<IEnumerable<TempatDetail>> GetTempat(string userName)
+        {
+            var user = await _userManager.FindByNameAsync(userName.ToUpper());
+            if (user == null)
+                throw new UnauthorizedAccessException("Anda Tidak Memiliki Akses");
+
+            var karyawan = _db.Karyawans.SingleOrDefault(x => x.UserId == user.Id);
+            if (karyawan == null)
+                throw new UnauthorizedAccessException("Anda Tidak Memiliki Profile");
+
+            var tempats = _db.TempatDetails.Where(x => x.KaryawanId == karyawan.Id).Include(x => x.Tempat).ToList().AsEnumerable();
+
+            return tempats;
 
 
+        }
     }
 }

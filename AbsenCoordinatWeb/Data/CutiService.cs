@@ -1,4 +1,5 @@
 ﻿using AbsenCoordinatWeb.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,17 +10,22 @@ namespace AbsenCoordinatWeb.Data
 {
     public class CutiService
     {
-        private ApplicationDbContext _db;
+        private readonly ApplicationDbContext _db;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public CutiService(ApplicationDbContext dbcontext)
+        public CutiService(ApplicationDbContext dbcontext, UserManager<IdentityUser> userManager)
         {
             _db = dbcontext;
+            _userManager = userManager;
         }
 
 
         public Task<Cuti> Get(int id)
         {
-            var result = _db.Cutis.Where(x => x.Id == id).Include(x => x.Karyawan).SingleOrDefault();
+            var result = _db.Cutis.Where(x => x.Id == id)
+                .Include(x => x.Karyawan)
+                .Include(x=>x.Persetujuan)
+                .SingleOrDefault();
             return Task.FromResult(result);
         }
 
@@ -27,7 +33,9 @@ namespace AbsenCoordinatWeb.Data
 
         public Task<IEnumerable<Cuti>> Get()
         {
-            return Task.FromResult(_db.Cutis.AsEnumerable());
+            var data = _db.Cutis.Include(x => x.Karyawan)
+                .Include(x => x.Persetujuan).AsEnumerable();
+            return Task.FromResult(data);
         }
 
 
@@ -41,7 +49,7 @@ namespace AbsenCoordinatWeb.Data
             return Task.FromResult(true);
         }
 
-        public Task<Cuti> Save(Cuti model)
+        public async Task<Cuti> Save(Cuti model)
         {
             try
             {
@@ -56,9 +64,9 @@ namespace AbsenCoordinatWeb.Data
                     _db.Entry(oldData).CurrentValues.SetValues(model);
                 }
 
-                _db.SaveChangesAsync();
+                 await _db.SaveChangesAsync();
 
-                return Task.FromResult(model);
+                return model;
             }
             catch (Exception ex)
             {
@@ -66,7 +74,56 @@ namespace AbsenCoordinatWeb.Data
             }
         }
 
+        public async Task<Cuti> Approve(string hrdName, Cuti model)
+        {
+            try
+            {
+                var user = await _userManager.FindByNameAsync(hrdName.ToUpper());
+                if (user == null)
+                    throw new UnauthorizedAccessException("Anda Tidak Memiliki Akses");
 
+                var karyawan = _db.Karyawans.SingleOrDefault(x => x.UserId == user.Id);
+                  if(karyawan==null)
+                    throw new UnauthorizedAccessException("Anda Tidak Memiliki Akses");
 
+                model.Persetujuan.KaryawanId = karyawan.Id;
+                if(model.Persetujuan.Id<=0)
+                {
+                    _db.Persetujuan.Add(model.Persetujuan);
+                }
+                else
+                {
+                    var oldData = _db.Persetujuan.SingleOrDefault(x => x.Id == model.Persetujuan.Id);
+                        _db.Entry(oldData).CurrentValues.SetValues(model.Persetujuan);
+
+                }
+                await _db.SaveChangesAsync();
+                return model;
+            }
+            catch (Exception ex)
+            {
+                throw new SystemException(ex.Message);
+            }
+        }
+
+        internal async Task<IEnumerable<Cuti>> GetCutiByUser(string userName)
+        {
+            try
+            {
+                var user = await _userManager.FindByNameAsync(userName.ToUpper());
+                if (user == null)
+                    throw new UnauthorizedAccessException("Anda Tidak Memiliki Akses");
+                var karyawan = _db.Karyawans.SingleOrDefault(x => x.UserId == user.Id);
+                if (karyawan == null)
+                    throw new UnauthorizedAccessException("Anda Tidak Memiliki Akses");
+                var result = _db.Cutis.Where(x=>x.KaryawanId==karyawan.Id).Include(x => x.Persetujuan).AsEnumerable();
+                return result;
+
+            }
+            catch (Exception ex)
+            {
+                throw new SystemException(ex.Message);
+            }
+        }
     }
 }

@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:AbsenCoordinateMobile.Views"
+             xmlns:model="clr-namespace:AbsenCoordinateMobile.Models"
+             Title="DATA ABSENSI"
+             x:Class="AbsenCoordinateMobile.Views.AbsenView">
+    <ContentPage.Content>
+        <RefreshView x:DataType="local:AbsenDataViewModel" Command="{Binding LoadItemsCommand}" IsRefreshing="{Binding IsBusy, Mode=TwoWay}">
+            <CollectionView x:Name="ItemsListView"
+                ItemsSource="{Binding Items}"
+                SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <StackLayout BackgroundColor="White">
+                            <StackLayout BackgroundColor="WhiteSmoke" Margin="5" Padding="10" x:DataType="model:Absen">
+                                <Label HorizontalOptions="EndAndExpand" Text="{Binding Masuk, StringFormat='{}{0:dd MMM yyyy}'}" 
+                                   LineBreakMode="NoWrap" Style="{DynamicResource ListItemTextStyle}" FontSize="13" >
+
+                                </Label>
+                                <Label LineBreakMode="NoWrap" 
+                                   Style="{DynamicResource ListItemTextStyle}" FontSize="16">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="Masuk  : "></Span>
+                                            <Span Text="{Binding Masuk, StringFormat='{}{0:HH:mm:ss}'}" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                                <Label LineBreakMode="NoWrap" 
+                                   Style="{DynamicResource ListItemTextStyle}" FontSize="16">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="Pulang : "></Span>
+                                            <Span Text="{Binding Pulang, StringFormat='{}{0:HH:mm:ss}'}" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                            </StackLayout>
+                        </StackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </ContentPage.Content>
+</ContentPage>

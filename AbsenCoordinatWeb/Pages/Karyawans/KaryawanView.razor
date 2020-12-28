@@ -7,9 +7,12 @@
 @inject KaryawanService karyawanService
 @inject NavigationManager nav
 
+@attribute [Authorize(Roles = "Hrd")]
+
 <h4>Karyawan</h4>
 <p>Daftar Karyawan </p>
 <a href="/karyawan/create"><span class="oi oi-plus" aria-hidden="true"></span></a>
+<a href="/report/karyawan"><span class="oi oi-print" aria-hidden="true"></span></a>
 
 @if (karyawans == null)
 {
@@ -21,8 +24,10 @@ else
         <thead>
             <tr>
                 <th>Nama</th>
+                <th>NIK</th>
+                <th>Unit Kerja</th>
+                <th>Lokasi Kerja</th>
                 <th>Jabatan</th>
-                <th>Alamat</th>
                 <th></th>
             </tr>
         </thead>
@@ -31,10 +36,14 @@ else
             {
                 <tr>
                     <td>@item.Name</td>
+                    <td>@item.NIK</td>
+                    <td>@item.UnitKerja</td>
+                    <td>@item.LokasiKerja</td>
                     <td>@item.Jabatan</td>
-                    <td>@item.Alamat</td>
                     <td>
-                        <button @onclick="()=>edit(item.Id)" class="btn btn-warning">Edit</button>
+                        <button @onclick="()=>edit(item.Id)" class="btn btn-warning">
+                            <i class="oi oi-pencil"></i>
+                        </button>
                     </td>
                 </tr>
             }

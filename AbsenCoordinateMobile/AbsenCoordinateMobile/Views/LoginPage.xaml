@@ -7,8 +7,30 @@
              x:Class="AbsenCoordinateMobile.Views.LoginPage"
              Shell.NavBarIsVisible="False">
     <ContentPage.Content>
-        <StackLayout Padding="10,0,10,0" VerticalOptions="Center">
-            <Button VerticalOptions="Center" Text="Login" Command="{Binding LoginCommand}"/>
-        </StackLayout>
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+
+            <StackLayout>
+                <Image HeightRequest="150"></Image>
+            </StackLayout>
+            <StackLayout Margin="20" Grid.Row="1" VerticalOptions="Center">
+                <StackLayout Margin="5">
+                    <Label Text="Email/User Name"/>
+                    <Entry Text="{Binding UserName}"/>
+                </StackLayout>
+                <StackLayout Margin="5">
+                    <Label Text="Password"/>
+                    <Entry IsPassword="True" Text="{Binding Password}"/>
+                </StackLayout>
+                <Button Margin="5" Text="Login" Command="{Binding LoginCommand}"></Button>
+            </StackLayout>
+            <StackLayout Grid.Row="2">
+                <Entry Text="{Binding Url}" HorizontalTextAlignment="Center"/>
+            </StackLayout>
+        </Grid>
     </ContentPage.Content>
 </ContentPage>

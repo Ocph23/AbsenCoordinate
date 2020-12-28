@@ -28,6 +28,7 @@ namespace AbsenCoordinatWeb
                 {
                     var user = new IdentityUser { Email = "ocph23@gmail.com", UserName = "ocph23@gmail.com", EmailConfirmed=true };
                     await userManagaer.CreateAsync(user, "Sony@77");
+                    await userManagaer.AddToRoleAsync(user, "Hrd");
                 }
                 trans.Commit();
             }

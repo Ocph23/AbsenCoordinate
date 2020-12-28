@@ -114,7 +114,7 @@ namespace AbsenCoordinatWeb.Data
             var _absenSetting = _appSetting.AbsenSetting;
             try
             {
-                var now = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                var now = DateTime.Now; 
 
                 var masuk = new DateTime(now.Year, now.Month, now.Day, _absenSetting.Masuk.Hours,
                     _absenSetting.Masuk.Minutes, _absenSetting.Masuk.Seconds);
@@ -122,8 +122,11 @@ namespace AbsenCoordinatWeb.Data
                 var pulang = new DateTime(now.Year, now.Month, now.Day, _absenSetting.Pulang.Hours,
                     _absenSetting.Pulang.Minutes, _absenSetting.Pulang.Seconds);
 
-                var absenToday = _db.Absens.Where(x => x.KaryawanId == karyawanId && x.Masuk.Value.Year == now.Year
-                && x.Masuk.Value.Month == now.Month && x.Masuk.Value.Day == now.Day).FirstOrDefault();
+
+                var nowSearch=new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+
+                var absenToday = _db.Absens.Where(x => x.KaryawanId == karyawanId && x.Masuk.Value.Year == nowSearch.Year
+                && x.Masuk.Value.Month == nowSearch.Month && x.Masuk.Value.Day == nowSearch.Day).FirstOrDefault();
                 if (absenToday == null)
                 {
                     //Absen Masuk

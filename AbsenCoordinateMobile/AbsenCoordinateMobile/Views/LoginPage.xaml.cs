@@ -50,6 +50,7 @@ namespace AbsenCoordinateMobile.Views
             set
             {
                 SetProperty(ref url, value);
+                Helper.Url = Url;
 
             }
         }
@@ -69,6 +70,7 @@ namespace AbsenCoordinateMobile.Views
             set
             {
                 SetProperty(ref _password, value);
+               
             }
 
         }

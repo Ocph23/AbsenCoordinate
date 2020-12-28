@@ -4,10 +4,9 @@
              x:Class="AbsenCoordinateMobile.Views.LogoutPage">
     <ContentPage.Content>
         <StackLayout  VerticalOptions="CenterAndExpand" >
-            <Label Text="Yakin Keluar ?"
-               
+            <Label FontSize="20" Text="Yakin Keluar ?"
                 HorizontalOptions="CenterAndExpand" />
-            <Button Text="Logout" Clicked="logoutClick"></Button>
+            <Button Text="Logout" Margin="30" Clicked="logoutClick"></Button>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

@@ -10,8 +10,14 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
-            <StackLayout Padding="10" Grid.Row="1">
-                <Label Text="About"/>
+            <StackLayout VerticalOptions="CenterAndExpand">
+                <Label HorizontalOptions="CenterAndExpand" FontAttributes="Bold" Text="PT. Mitra Akses Papua" FontSize="20" Margin="20"></Label>
+                <Label HorizontalOptions="CenterAndExpand" Text="Aplikasi Absen Karyawan Menggunakan GPS Kordinat" FontSize="15"></Label>
+                <Label HorizontalOptions="CenterAndExpand" Text="Menggunakan GPS Kordinat Dan" FontSize="15"></Label>
+                <Label HorizontalOptions="CenterAndExpand" Text="Pengajuan Cuti Karyawan" FontSize="15"></Label>
+            </StackLayout>
+            <StackLayout Padding="10" Grid.Row="1" Margin="20">
+                <Image Source="logo.png" WidthRequest="150" HorizontalOptions="Center" VerticalOptions="EndAndExpand"/>
             </StackLayout>
         </Grid>
     </ContentPage.Content>

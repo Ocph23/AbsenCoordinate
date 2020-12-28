@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0" package="com.ocph23.absencoordinatemobile" android:installLocation="auto">
-	<uses-sdk android:minSdkVersion="23" android:targetSdkVersion="28" />
-	<application android:label="AbsenCoordinate" android:theme="@style/MainTheme">
+	<uses-sdk android:minSdkVersion="23" android:targetSdkVersion="29" />
+	<application android:label="AbsenCoordinate" android:theme="@style/MainTheme" android:icon="@mipmap/icon">
 		<meta-data android:name="com.google.android.maps.v2.API_KEY" android:value="AIzaSyAzCvSPM-ZqFS13Jk0463ZjqkhAkbF8Udc" />
 		<meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
 		<uses-library android:name="org.apache.http.legacy" android:required="false" />

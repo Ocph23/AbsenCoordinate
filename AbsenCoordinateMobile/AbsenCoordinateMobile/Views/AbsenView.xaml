@@ -13,7 +13,7 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <StackLayout BackgroundColor="White">
-                            <StackLayout BackgroundColor="WhiteSmoke" Margin="5" Padding="10" x:DataType="model:Absen">
+                            <StackLayout BackgroundColor="WhiteSmoke" Margin="2" Padding="5" x:DataType="model:Absen">
                                 <Label HorizontalOptions="EndAndExpand" Text="{Binding Masuk, StringFormat='{}{0:dd MMM yyyy}'}" 
                                    LineBreakMode="NoWrap" Style="{DynamicResource ListItemTextStyle}" FontSize="13" >
 

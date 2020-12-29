@@ -15,7 +15,7 @@
             </Grid.RowDefinitions>
 
             <StackLayout>
-                <Image HeightRequest="150"></Image>
+                <Image Source="logo.png" WidthRequest="150" HorizontalOptions="Center" VerticalOptions="EndAndExpand"/>
             </StackLayout>
             <StackLayout Margin="20" Grid.Row="1" VerticalOptions="Center">
                 <StackLayout Margin="5">

@@ -60,7 +60,7 @@ else
         <div class=" col-md-6">
             <div class="form-group">
                 <label>Status Persetujuan</label>
-                <InputSelect class="form-control" @bind-Value="Model.Persetujuan.StatusPengajuan">
+                <InputSelect disabled=@(!canChange) class="form-control" @bind-Value="Model.Persetujuan.StatusPengajuan">
                     @foreach (var value in Enum.GetValues(typeof(StatusPengajuanCuti)))
                         {
                             if (value.ToString() != "None")
@@ -75,24 +75,24 @@ else
             {
                 <div class="form-group">
                     <label>Mulai</label>
-                    <InputDate class="form-control" @bind-Value="Model.Persetujuan.Mulai" />
+                    <InputDate disabled=@(!canChange) class="form-control" @bind-Value="Model.Persetujuan.Mulai" />
                 </div>
                 <div class="form-group">
                     <label>Hingga</label>
-                    <InputDate class="form-control" @bind-Value="Model.Persetujuan.Berakhir" />
+                    <InputDate disabled=@(!canChange) class="form-control" @bind-Value="Model.Persetujuan.Berakhir" />
                 </div>
             }
 
             <div class="form-group">
                 <label>Catatan Persetuajuan</label>
-                <InputTextArea class="form-control" @bind-Value="Model.Persetujuan.CatatanPersetujuan" />
+                <InputTextArea disabled=@(!canChange) class="form-control" @bind-Value="Model.Persetujuan.CatatanPersetujuan" />
             </div>
             <div class="form-group">
                 <label>Tanggal Persetujuan</label>
-                <InputDate class="form-control" @bind-Value="Model.Persetujuan.TanggalPersetujuan" />
+                <InputDate disabled=@(!canChange) class="form-control" @bind-Value="Model.Persetujuan.TanggalPersetujuan" />
             </div>
         </div>
-        <button style="text-align:right" type="submit" class="btn btn-success">Simpan</button>
+        <button disabled=@(!canChange) style="text-align:right" type="submit" class="btn btn-success">Simpan</button>
     </EditForm>
 }
 
@@ -100,6 +100,7 @@ else
     [Parameter]
     public string Id { get; set; }
     Cuti Model { get; set; }
+    bool canChange = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -108,18 +109,9 @@ else
         if (Model!=null && Model.Persetujuan == null)
             Model.Persetujuan = new PersetujuanCuti() { Mulai = Model.Mulai, Berakhir = Model.Berakhir, TanggalPersetujuan = DateTime.Now };
 
-        else
+        else if (Model.Persetujuan.StatusPengajuan== StatusPengajuanCuti.Disetujui && Model.Persetujuan.Mulai <= DateTime.Now)
         {
-            await Swal.FireAsync(new SweetAlertOptions
-            {
-                Position = SweetAlertPosition.TopEnd,
-                Text = " Data Tidak Dapat Diubah !",
-                Icon = SweetAlertIcon.Success,
-                Timer = 1500,
-                HeightAuto = false,
-                ShowCloseButton = false
-            });
-            back();
+            canChange = false;
         }
     }
 
@@ -127,6 +119,22 @@ else
     {
         try
         {
+            if (!canChange)
+            {
+                await Swal.FireAsync(new SweetAlertOptions
+                {
+                    Position = SweetAlertPosition.TopEnd,
+                    Text = " Data Tidak Dapat Diubah !",
+                    Icon = SweetAlertIcon.Warning,
+                    Timer = 1500,
+                    HeightAuto = false,
+                    ShowCloseButton = false
+                });
+                return;
+            }
+
+
+
             var authstate = await auth.GetAuthenticationStateAsync();
 
             var result = await cutiService.Approve(authstate.User.Identity.Name, Model);
